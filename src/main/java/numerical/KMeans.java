@@ -7,25 +7,35 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 class Cluster {
-    double centriodX = 0.0;
-    double centriodY = 0.0;
-
+    double [] centriod;
     int clusterNo = -1;
 
-    public Cluster(int id) {
+    public Cluster(int id, List<double[]> features, int row) {
         this.clusterNo = id;
+        centriod = new double[features.size()];
+        for (int i = 0; i < features.size(); i++) {
+            centriod[i] = features.get(i)[row];
+        }
     }
 }
 
 public class KMeans {
 
 
-    public double euclideanDistance(double observationX, double obsevationY, double centriodX, double centriodY) {
-        //We do it for 2 variables only...
-        double diff1 = observationX - centriodX;
-        double diff2 = obsevationY - centriodY;
+    //https://en.wikipedia.org/wiki/Euclidean_distance
+    public double euclideanDistance2(List<double[]> features, int row,Cluster [] clusters, int clusterIndex) {
+        double diffs[] = new double[features.size()];
 
-        return  Math.sqrt((diff1*diff1) + (diff2*diff2));
+        for (int i = 0; i < features.size(); i++) {
+            diffs[i] =  features.get(i)[row] - clusters[clusterIndex].centriod[i];
+        }
+
+        double SUM = 0.0;
+        for ( double diff : diffs) {
+            SUM = SUM + (diff*diff);
+        }
+
+        return  Math.sqrt(SUM);
 
     }
 
@@ -34,9 +44,7 @@ public class KMeans {
 
         //Start with centriod values as index 0 and index 1
         for (int index = 0; index < K; index++) {
-            clusters[index] = new Cluster(index);
-            clusters[index].centriodX = features.get(0)[index];
-            clusters[index].centriodY = features.get(1)[index];
+            clusters[index] = new Cluster(index, features, index);
         }
 
         final int numRows = features.get(0).length;
@@ -50,15 +58,13 @@ public class KMeans {
                 double minDistance =Double.MAX_VALUE;
                 int minDistanceClusterIndex = -1;
                 for (int index = 0; index < K; index++) {
-                    double distance = euclideanDistance(features.get(0)[i], features.get(1)[i], clusters[index].centriodX, clusters[index].centriodY);
+                    double distance = euclideanDistance2(features, i, clusters, index);
                     if ( distance < minDistance ) {
                         minDistanceClusterIndex = index;
                         minDistance = distance;
                     }
                 }
-
                 clusterAssignment[i] = minDistanceClusterIndex;
-
             }
 
             if ( oldClusterAssignment == null) {
