@@ -3,7 +3,6 @@ package numerical;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.*;
 
 class Cluster {
@@ -23,7 +22,7 @@ public class KMeans {
 
 
     //https://en.wikipedia.org/wiki/Euclidean_distance
-    public double euclideanDistance2(List<double[]> features, int row,Cluster [] clusters, int clusterIndex) {
+    public double euclideanDistance(List<double[]> features, int row, Cluster [] clusters, int clusterIndex) {
         double diffs[] = new double[features.size()];
 
         for (int i = 0; i < features.size(); i++) {
@@ -42,7 +41,7 @@ public class KMeans {
     public int[] kMeans(int K, List<double[]> features) {
         Cluster clusters [] = new Cluster[K];
 
-        //Start with centriod values as index 0 and index 1
+        //STEP3: Create Initial Cluster Centroid
         for (int index = 0; index < K; index++) {
             clusters[index] = new Cluster(index, features, index);
         }
@@ -54,11 +53,12 @@ public class KMeans {
         boolean continueFlag = true;
         while ( continueFlag ) {
 
+            //STEP4: Calculate distance for each point from Centroid
             for (int i = 0; i < numRows; i++) {
                 double minDistance =Double.MAX_VALUE;
                 int minDistanceClusterIndex = -1;
-                for (int index = 0; index < K; index++) {
-                    double distance = euclideanDistance2(features, i, clusters, index);
+                for (int index = 0; index < clusters.length; index++) {
+                    double distance = euclideanDistance(features, i, clusters, index);
                     if ( distance < minDistance ) {
                         minDistanceClusterIndex = index;
                         minDistance = distance;
@@ -67,6 +67,7 @@ public class KMeans {
                 clusterAssignment[i] = minDistanceClusterIndex;
             }
 
+            //STEP5: Check if cluster assignment has changed or not
             if ( oldClusterAssignment == null) {
                 oldClusterAssignment = new int[clusterAssignment.length];
 
@@ -86,28 +87,43 @@ public class KMeans {
                 }
             }
 
+            //STEP6: Re-Calculate Cluster Centroid using mean of cluster values
+            int clusterMemberCount [] = new int[K];
+            for ( int i = 0; i < clusterMemberCount.length; i++) {
+                clusterMemberCount[i] = 0;
+                for (int featureIndex = 0; featureIndex < features.size(); featureIndex++) {
+                    clusters[i].centriod[featureIndex] = 0.0;
+                }
+            }
+
+            for ( int i = 0; i < numRows; i++) {
+                int clusterIndex = clusterAssignment[i];
+                clusterMemberCount[clusterIndex] = clusterMemberCount[clusterIndex] + 1;
+
+                for (int featureIndex = 0; featureIndex < features.size(); featureIndex++) {
+                    clusters[clusterIndex].centriod[featureIndex] += features.get(featureIndex)[i];
+                }
+            }
+            for ( int i = 0; i < clusterMemberCount.length; i++) {
+                    for (int j = 0; j < clusters[i].centriod.length; j++) {
+                        clusters[i].centriod[j] = clusters[i].centriod[j] / (clusterMemberCount[i] * 1.0);
+                    }
+
+            }
+
+            for(int i = 0; i < numRows; i++) {
+                System.out.print(" " + clusterAssignment[i]);
+            }
+            System.out.println("");
+
+
+
+
         }
         return clusterAssignment;
     }
 
-
-    public List<double[]> getFeatures(List<String> lines) throws Exception {
-
-        Map<Integer, List<Integer>> featureMap = new HashMap<Integer, List<Integer>>();
-
-        for ( String line : lines ) {
-            String split [] = line.split(" ");
-            for (int i = 0; i < split.length; i++) {
-                int val = Integer.parseInt(split[i].trim());
-                List<Integer> feature = featureMap.get(i);
-                if ( feature == null) {
-                    feature = new LinkedList<Integer>();
-                    featureMap.put(i, feature);
-                }
-                feature.add(val);
-            }
-        }
-
+    public List<double[]> normalizeFeatures(Map<Integer, List<Integer>> featureMap) {
         List<double[]> result = new LinkedList<double[]>();
         //Now normalize each feature..min-max normalization
         for (Integer i : featureMap.keySet()) {
@@ -129,11 +145,29 @@ public class KMeans {
                 array[index++] = (( val - min )*1.0) / ((max - min)*1.0);
             }
             result.add(array);
-
-
         }
 
         return result;
+    }
+
+    public Map<Integer, List<Integer>> getFeatures(List<String> lines) throws Exception {
+
+        Map<Integer, List<Integer>> featureMap = new HashMap<Integer, List<Integer>>();
+
+        for ( String line : lines ) {
+            String split [] = line.split(" ");
+            for (int i = 0; i < split.length; i++) {
+                int val = Integer.parseInt(split[i].trim());
+                List<Integer> feature = featureMap.get(i);
+                if ( feature == null) {
+                    feature = new LinkedList<Integer>();
+                    featureMap.put(i, feature);
+                }
+                feature.add(val);
+            }
+        }
+
+        return featureMap;
 
     }
 
@@ -144,17 +178,18 @@ public class KMeans {
         int K = 2;
 
 
-        //Input Data reference: http://dni-institute.in/blogs/k-means-clustering-algorithm-explained/
-        //To validate that what is written can be cross checked for output values
         File file = new File("src//main//java//numerical//input.txt");
 
-
-        System.out.println(file.getAbsolutePath());
+        //Step1: Read Features
         List<String> lines = FileUtils.readLines(file,"UTF-8");
-        List<double[]> features = client.getFeatures(lines);
+        Map<Integer, List<Integer>> featureMap = client.getFeatures(lines);
 
+        //Step2: Normalize Features
+        List<double[]> features = client.normalizeFeatures(featureMap);
 
         int clusterAssignment [] = client.kMeans(K, features);
+
+
         for (int i = 0; i < clusterAssignment.length; i++) {
             System.out.println(lines.get(i) + " ==> " + " Cluster-" + clusterAssignment[i]);
         }
