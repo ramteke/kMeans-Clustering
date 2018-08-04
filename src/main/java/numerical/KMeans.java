@@ -85,32 +85,6 @@ public class KMeans {
     }
 
 
-    public static void main(String args[]) throws Exception {
-        KMeans client = new KMeans();
-        int K = 2;
-
-
-        //Input Data reference: http://dni-institute.in/blogs/k-means-clustering-algorithm-explained/
-        //To validate that what is written can be cross checked for output values
-        File file = new File("src//main//java//numerical//input.txt");
-
-
-        System.out.println(file.getAbsolutePath());
-        List<String> lines = FileUtils.readLines(file,"UTF-8");
-        List<double[]> features = client.getFeatures(lines);
-
-
-        int clusterAssignment [] = client.kMeans(K, features);
-        for (int i = 0; i < clusterAssignment.length; i++) {
-            System.out.println(lines.get(i) + " ==> " + " Cluster-" + clusterAssignment[i]);
-        }
-
-
-
-
-    }
-
-
     public List<double[]> getFeatures(List<String> lines) throws Exception {
 
         Map<Integer, List<Integer>> featureMap = new HashMap<Integer, List<Integer>>();
@@ -157,5 +131,28 @@ public class KMeans {
 
     }
 
+
+
+    public static void main(String args[]) throws Exception {
+        KMeans client = new KMeans();
+        int K = 2;
+
+
+        //Input Data reference: http://dni-institute.in/blogs/k-means-clustering-algorithm-explained/
+        //To validate that what is written can be cross checked for output values
+        File file = new File("src//main//java//numerical//input.txt");
+
+
+        System.out.println(file.getAbsolutePath());
+        List<String> lines = FileUtils.readLines(file,"UTF-8");
+        List<double[]> features = client.getFeatures(lines);
+
+
+        int clusterAssignment [] = client.kMeans(K, features);
+        for (int i = 0; i < clusterAssignment.length; i++) {
+            System.out.println(lines.get(i) + " ==> " + " Cluster-" + clusterAssignment[i]);
+        }
+
+    }
 
 }
