@@ -1,4 +1,4 @@
-package numerical.basicKMeans;
+package machinelearning.basicKMeans;
 /**
  * Created by skynet on 05/08/18.
  */
@@ -8,18 +8,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.util.*;
 
-class Cluster {
-    double [] centriod;
-    int clusterNo = -1;
 
-    public Cluster(int id, List<double[]> features, int row) {
-        this.clusterNo = id;
-        centriod = new double[features.size()];
-        for (int i = 0; i < features.size(); i++) {
-            centriod[i] = features.get(i)[row];
-        }
-    }
-}
 
 public class KMeans {
 
@@ -90,29 +79,8 @@ public class KMeans {
                 }
             }
 
-            //STEP6: Re-Calculate Cluster Centroid using mean of cluster values
-            int clusterMemberCount [] = new int[K];
-            for ( int i = 0; i < clusterMemberCount.length; i++) {
-                clusterMemberCount[i] = 0;
-                for (int featureIndex = 0; featureIndex < features.size(); featureIndex++) {
-                    clusters[i].centriod[featureIndex] = 0.0;
-                }
-            }
-
-            for ( int i = 0; i < numRows; i++) {
-                int clusterIndex = clusterAssignment[i];
-                clusterMemberCount[clusterIndex] = clusterMemberCount[clusterIndex] + 1;
-
-                for (int featureIndex = 0; featureIndex < features.size(); featureIndex++) {
-                    clusters[clusterIndex].centriod[featureIndex] += features.get(featureIndex)[i];
-                }
-            }
-            for ( int i = 0; i < clusterMemberCount.length; i++) {
-                    for (int j = 0; j < clusters[i].centriod.length; j++) {
-                        clusters[i].centriod[j] = clusters[i].centriod[j] / (clusterMemberCount[i] * 1.0);
-                    }
-
-            }
+            //STEP6: Recalculate cluster Centroid
+            reCalculateClusterCentriods(clusters, features, K, clusterAssignment);
 
             for(int i = 0; i < numRows; i++) {
                 System.out.print(" " + clusterAssignment[i]);
@@ -124,6 +92,34 @@ public class KMeans {
 
         }
         return clusterAssignment;
+    }
+
+    public void reCalculateClusterCentriods(Cluster [] clusters, List<double[]> features, int K, int [] clusterAssignment) {
+        //STEP6: Re-Calculate Cluster Centroid using mean of cluster values
+        final int numRows = features.get(0).length;
+        int clusterMemberCount [] = new int[K];
+        for ( int i = 0; i < clusterMemberCount.length; i++) {
+            clusterMemberCount[i] = 0;
+            for (int featureIndex = 0; featureIndex < features.size(); featureIndex++) {
+                clusters[i].centriod[featureIndex] = 0.0;
+            }
+        }
+
+        for ( int i = 0; i < numRows; i++) {
+            int clusterIndex = clusterAssignment[i];
+            clusterMemberCount[clusterIndex] = clusterMemberCount[clusterIndex] + 1;
+
+            for (int featureIndex = 0; featureIndex < features.size(); featureIndex++) {
+                clusters[clusterIndex].centriod[featureIndex] += features.get(featureIndex)[i];
+            }
+        }
+        for ( int i = 0; i < clusterMemberCount.length; i++) {
+            for (int j = 0; j < clusters[i].centriod.length; j++) {
+                clusters[i].centriod[j] = clusters[i].centriod[j] / (clusterMemberCount[i] * 1.0);
+            }
+
+        }
+
     }
 
     public List<double[]> normalizeFeatures(Map<Integer, List<Integer>> featureMap) {
@@ -181,7 +177,7 @@ public class KMeans {
         int K = 3;
 
 
-        File file = new File("src//main//java//numerical//basicKMeans//input.txt");
+        File file = new File("src//main//java//machinelearning//basicKMeans//input.txt");
 
         //Step1: Read Features
         List<String> lines = FileUtils.readLines(file,"UTF-8");
