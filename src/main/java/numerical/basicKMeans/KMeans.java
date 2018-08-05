@@ -181,7 +181,7 @@ public class KMeans {
         int K = 3;
 
 
-        File file = new File("src//main//java//numerical//input.txt");
+        File file = new File("src//main//java//numerical//basicKMeans//input.txt");
 
         //Step1: Read Features
         List<String> lines = FileUtils.readLines(file,"UTF-8");
