@@ -1,4 +1,4 @@
-Numerical KMeans Clustering
+KMeans Clustering
 
 <br>Expected Output:
 <br>
