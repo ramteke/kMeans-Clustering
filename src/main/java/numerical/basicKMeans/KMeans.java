@@ -1,4 +1,7 @@
-package numerical;
+package numerical.basicKMeans;
+/**
+ * Created by skynet on 05/08/18.
+ */
 
 import org.apache.commons.io.FileUtils;
 
@@ -175,7 +178,7 @@ public class KMeans {
 
     public static void main(String args[]) throws Exception {
         KMeans client = new KMeans();
-        int K = 2;
+        int K = 3;
 
 
         File file = new File("src//main//java//numerical//input.txt");
