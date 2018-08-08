@@ -30,13 +30,9 @@ public class KMeans {
 
     }
 
-    public int[] kMeans(int K, List<double[]> features) {
-        Cluster clusters [] = new Cluster[K];
+    public int[] kMeans(int K, List<double[]> features, Cluster clusters[]) {
 
-        //STEP3: Create Initial Cluster Centroid
-        for (int index = 0; index < K; index++) {
-            clusters[index] = new Cluster(index, features, index);
-        }
+
 
         final int numRows = features.get(0).length;
         int clusterAssignment [] = new int[numRows];
@@ -80,7 +76,7 @@ public class KMeans {
             }
 
             //STEP6: Recalculate cluster Centroid
-            reCalculateClusterCentriods(clusters, features, K, clusterAssignment);
+            reCalculateClusterCentriods(clusters, features,  clusterAssignment);
 
             for(int i = 0; i < numRows; i++) {
                 System.out.print(" " + clusterAssignment[i]);
@@ -94,12 +90,11 @@ public class KMeans {
         return clusterAssignment;
     }
 
-    public void reCalculateClusterCentriods(Cluster [] clusters, List<double[]> features, int K, int [] clusterAssignment) {
+    public void reCalculateClusterCentriods(Cluster [] clusters,List<double[]> features, int [] clusterAssignment) {
         //STEP6: Re-Calculate Cluster Centroid using mean of cluster values
         final int numRows = features.get(0).length;
-        int clusterMemberCount [] = new int[K];
-        for ( int i = 0; i < clusterMemberCount.length; i++) {
-            clusterMemberCount[i] = 0;
+        int clusterAssignmentCount [] = new int[clusterAssignment.length];
+        for ( int i = 0; i < clusters.length; i++) {
             for (int featureIndex = 0; featureIndex < features.size(); featureIndex++) {
                 clusters[i].centriod[featureIndex] = 0.0;
             }
@@ -107,18 +102,19 @@ public class KMeans {
 
         for ( int i = 0; i < numRows; i++) {
             int clusterIndex = clusterAssignment[i];
-            clusterMemberCount[clusterIndex] = clusterMemberCount[clusterIndex] + 1;
+            clusterAssignmentCount[clusterIndex] = clusterAssignmentCount[clusterIndex] + 1;
 
             for (int featureIndex = 0; featureIndex < features.size(); featureIndex++) {
                 clusters[clusterIndex].centriod[featureIndex] += features.get(featureIndex)[i];
             }
         }
-        for ( int i = 0; i < clusterMemberCount.length; i++) {
-            for (int j = 0; j < clusters[i].centriod.length; j++) {
-                clusters[i].centriod[j] = clusters[i].centriod[j] / (clusterMemberCount[i] * 1.0);
-            }
 
+        for (int i = 0; i < clusters.length; i++) {
+            for (int featureIndex = 0; featureIndex < features.size(); featureIndex++) {
+                clusters[i].centriod[featureIndex] = clusters[i].centriod[featureIndex] / (clusterAssignmentCount[i] * 1.0);
+            }
         }
+
 
     }
 
@@ -174,7 +170,7 @@ public class KMeans {
 
     public static void main(String args[]) throws Exception {
         KMeans client = new KMeans();
-        int K = 3;
+        int K = 5;
 
 
         File file = new File("src//main//java//machinelearning//basicKMeans//input.txt");
@@ -186,7 +182,13 @@ public class KMeans {
         //Step2: Normalize Features
         List<double[]> features = client.normalizeFeatures(featureMap);
 
-        int clusterAssignment [] = client.kMeans(K, features);
+        Cluster clusters [] = new Cluster[K];
+
+        //STEP3: Create Initial Cluster Centroid
+        for (int index = 0; index < K; index++) {
+            clusters[index] = new Cluster(index, features, index);
+        }
+        int clusterAssignment [] = client.kMeans(K, features, clusters);
 
 
         for (int i = 0; i < clusterAssignment.length; i++) {
