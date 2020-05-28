@@ -124,16 +124,8 @@ public class KMeans {
         //Now normalize each feature..min-max normalization
         for (Integer i : featureMap.keySet()) {
             List<Integer> list = featureMap.get(i);
-            int max = Integer.MIN_VALUE;
-            int min = Integer.MAX_VALUE;
-
-            for (int val : list) {
-                if ( val > max) {
-                    max = val;
-                } else  if ( val < min) {
-                    min = val;
-                }
-            }
+            int max =  Collections.max(list);
+            int min = Collections.min(list);
 
             double [] array = new double[list.size()];
             int index = 0;
