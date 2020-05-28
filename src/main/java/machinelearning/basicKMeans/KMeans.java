@@ -3,9 +3,10 @@ package machinelearning.basicKMeans;
  * Created by skynet on 05/08/18.
  */
 
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 
 
@@ -172,11 +173,10 @@ public class KMeans {
         KMeans client = new KMeans();
         int K = 5;
 
-
-        File file = new File("src//main//java//machinelearning//basicKMeans//input.txt");
-
         //Step1: Read Features
-        List<String> lines = FileUtils.readLines(file,"UTF-8");
+        List<String> lines = readInput();
+
+
         Map<Integer, List<Integer>> featureMap = client.getFeatures(lines);
 
         //Step2: Normalize Features
@@ -195,6 +195,21 @@ public class KMeans {
             System.out.println(lines.get(i) + " ==> " + " Cluster-" + clusterAssignment[i]);
         }
 
+    }
+
+    private static List<String> readInput() throws IOException {
+        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+        InputStream is = classloader.getResourceAsStream("input.txt");
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        List<String> lines = new ArrayList<String>();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            lines.add(line);
+        }
+        reader.close();
+        is.close();
+        return lines;
     }
 
 }
